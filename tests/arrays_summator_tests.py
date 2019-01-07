@@ -1,7 +1,7 @@
 import unittest
 
-from summators.array.arrays_summator import ArraysSummator
-from summators.array.exceptions import WrongSummatorVectorLengthsException, WrongSummatorParametersException
+from main.neuron.summators.array.arrays_summator import ArraysSummator
+from main.neuron.summators.array.exceptions import WrongSummatorVectorLengthsException, WrongSummatorParametersException
 
 
 class TestArraysSummator(unittest.TestCase):

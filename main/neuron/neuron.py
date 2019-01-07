@@ -1,11 +1,6 @@
-from exceptions import SummatorClassCastException, ActivatorClassCastException
-from summators.abstract_summator import AbstractSummator
-
-
-class AbstractActivationFunctor:
-
-    def activate(self, activation_input):
-        raise NotImplementedError("Ooops! There is not implemented activation functor!")
+from main.neuron.activation.abstract_activation_functor import AbstractActivationFunctor
+from main.neuron.exceptions import SummatorClassCastException, ActivatorClassCastException
+from main.neuron.summators.abstract_summator import AbstractSummator
 
 
 class Neuron:

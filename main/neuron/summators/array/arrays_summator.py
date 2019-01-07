@@ -1,7 +1,7 @@
 from functools import reduce
 
-from summators.abstract_summator import AbstractSummator
-from summators.array.exceptions import WrongSummatorParametersException, WrongSummatorVectorLengthsException
+from main.neuron.summators.abstract_summator import AbstractSummator
+from main.neuron.summators.array.exceptions import WrongSummatorParametersException, WrongSummatorVectorLengthsException
 
 
 class ArraysSummator(AbstractSummator):
