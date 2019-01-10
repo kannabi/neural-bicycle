@@ -23,6 +23,10 @@ class Layer:
     def get_neurons(self):
         return self._neurons.values()
 
+    def remove_neuron(self, neuron_id):
+        deleted_neuron = self._neurons.pop(neuron_id)
+        deleted_neuron.dispose()
+
     def add_input_to_neuron(self, neuron_id, input_provider):
         neuron = self._neurons[neuron_id]
         if neuron is not None:

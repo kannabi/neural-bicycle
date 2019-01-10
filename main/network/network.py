@@ -7,18 +7,12 @@ from main.utils import check_class
 
 class Network:
 
-    def __init__(self, input_layer_dimension, output_layer_dimension):
-        check_class(input_layer_dimension, int)
-        check_class(output_layer_dimension, int)
+    def __init__(self):
         self._layers = []
 
-        self._input_layer_providers = self.__create_initial_input_providers(input_layer_dimension)
+        self._input_layer_providers = []
         self._input_layer = Layer()
         self._output_layer = Layer()
-
-    @staticmethod
-    def __create_initial_input_providers(dimension):
-        return list(map(lambda i: WeightedInputProvider(1, ConstantNeuronInputProvider()), range(dimension)))
 
     def add_layer(self, index=None):
         if index is None:
@@ -53,7 +47,7 @@ class Network:
         return len(self._layers)
 
     def add_neuron(self, layer_index, activator, summator=ArraysSummator()):
-        return self._layers[layer_index].create_neuron(self, activator, summator)
+        return self._layers[layer_index].create_neuron(activator, summator)
 
     def link_neurons(self, input_neuron_id, target_layer_index, target_neuron_id):
         input_layer = self.__get_input_layer(target_layer_index)
@@ -93,12 +87,39 @@ class Network:
                     WeightedInputProvider(1, input_neuron)
                 )
 
+    def add_input_neuron(self):
+        created_neuron_id = self._input_layer.create_neuron(ConstantActivationFunctor())
+        input_provider = ConstantNeuronInputProvider()
+        weighted_input_provider = WeightedInputProvider(1, input_provider)
+        self._input_layer.add_input_to_neuron(created_neuron_id, weighted_input_provider)
+        self._input_layer_providers.append(input_provider)
+        return created_neuron_id
+
+    def remove_input_neuron(self, neuron_id):
+        self._input_layer.remove_neuron(neuron_id)
+
+    def add_output_neuron(self, activator):
+        return self._output_layer.create_neuron(activator)
+
+    def remove_output_neuron(self, neuron_id):
+        self._input_layer.remove_neuron(neuron_id)
+
+    def add_output_input(self, input_neuron_id, output_neuron_id):
+        hidden_layers_number = len(self._layers)
+        input_layer = self._input_layer if hidden_layers_number == 0 else self._layers[hidden_layers_number - 1]
+        input_neuron = input_layer.get_neuron(input_neuron_id)
+        assert input_neuron is not None
+        self._output_layer.add_input_to_neuron(
+            output_neuron_id,
+            WeightedInputProvider(1, input_neuron)
+        )
+
     def activate(self, values):
         if len(values) != len(self._input_layer_providers):
             raise Exception("Input data size isn't fit with a input layer dimension")
 
         for i, value in enumerate(values):
-            self._input_layer_providers[i].get_input().set_input_value(value)
+            self._input_layer_providers[i].set_input_value(value)
 
         self._input_layer.activate_layer()
 
@@ -106,3 +127,4 @@ class Network:
             layer.activate_layer()
 
         self._output_layer.activate_layer()
+        return list(map(lambda neuron: neuron.get_input(), list(self._output_layer.get_neurons())))
