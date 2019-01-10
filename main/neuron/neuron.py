@@ -39,6 +39,7 @@ class ConstantNeuronInputProvider(NeuronInputProvider):
 
 
 class Neuron(NeuronInputProvider, Disposable):
+    """ Класс реализующий логику нейрона """
 
     def __init__(self, activator, summator=ArraysSummator(), input_providers=None):
         super().__init__()
@@ -89,6 +90,7 @@ class Neuron(NeuronInputProvider, Disposable):
 
 
 class WeightedInputProvider:
+    """ Класс, который содержит провайдера входного значения и его вес. """
 
     def __init__(self, weight, input_provider):
         self.__check_weight(weight)

@@ -5,6 +5,7 @@ from main.neuron.summators.array.arrays_summator import ArraysSummator
 
 
 class Layer:
+    """ Класс реализующий логику слоя нейронной сети """
 
     def __init__(self):
         self._neurons = OrderedDict()

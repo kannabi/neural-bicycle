@@ -2,16 +2,20 @@ from main.network.layer import Layer
 from main.neuron.activation.activation_functors import ConstantActivationFunctor
 from main.neuron.neuron import WeightedInputProvider, ConstantNeuronInputProvider, Neuron
 from main.neuron.summators.array.arrays_summator import ArraysSummator
-from main.utils import check_class
 
 
 class Network:
+    """ Класс реализующий логику нейронной сети """
 
     def __init__(self):
+        """ Список, в котором хранятся "скрытые" слои сети """
         self._layers = []
 
+        """ Список, который содержит в себе провайдеры для рецепторного слоя сети """
         self._input_layer_providers = []
+        """ Рецепторный слой """
         self._input_layer = Layer()
+        """ Выходной слой """
         self._output_layer = Layer()
 
     def add_layer(self, index=None):
