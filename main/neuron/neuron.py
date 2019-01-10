@@ -9,13 +9,16 @@ from main.utils import check_class, Disposable
 class NeuronInputProvider:
 
     def __init__(self):
-        self._dispose_callback = None
+        self._dispose_callbacks = []
+
+    def get_id(self):
+        raise NotImplementedError()
 
     def get_input(self):
         raise NotImplementedError()
 
     def set_on_dispose(self, on_dispose):
-        self._dispose_callback = on_dispose
+        self._dispose_callbacks.append(on_dispose)
 
 
 class ConstantNeuronInputProvider(NeuronInputProvider):
@@ -23,12 +26,16 @@ class ConstantNeuronInputProvider(NeuronInputProvider):
     def __init__(self, value=0):
         super().__init__()
         self._value = value
+        self._id = str(uuid.uuid4().hex)
 
     def get_input(self):
         return self._value
 
     def set_input_value(self, value):
         self._value = value
+
+    def get_id(self):
+        return self._id
 
 
 class Neuron(NeuronInputProvider, Disposable):
@@ -47,24 +54,24 @@ class Neuron(NeuronInputProvider, Disposable):
         check_class(summator, AbstractSummator, "Summator parameter is not subtype of AbstractSummator")
         self._summator = summator
 
-        self._input_providers = input_providers
+        self._input_providers = {provider.get_id: provider for provider in input_providers}
         for provider in self._input_providers:
-            provider.set_on_dispose(lambda: self._input_providers.remove(provider))
+            provider.set_on_dispose(lambda: self._input_providers.pop(provider.get_id()))
 
         self._last_result = 0.0
 
-    def get_activator(self):
-        return self._activator
-
     def add_input(self, input_provider):
-        check_class(input_provider, WeightedInputProvider, "Input neuron should be a WeightedNeuron")
-        input_provider.set_on_dispose(lambda: self._input_providers.remove(input_provider))
-        self._input_providers.append(input_provider)
+        check_class(input_provider, WeightedInputProvider, "Input provider should be a WeightedInputProvider")
+        input_provider.set_on_dispose(lambda: self._input_providers.pop(input_provider.get_id()))
+        self._input_providers[input_provider.get_id()] = input_provider
+
+    def remove_input(self, input_provider_id):
+        self._input_providers.pop(input_provider_id)
 
     def activate(self):
         weights = []
         inputs = []
-        for weighted_provider in self._input_providers:
+        for weighted_provider in self._input_providers.values():
             weights.append(weighted_provider.get_weight())
             inputs.append(weighted_provider.get_input())
 
@@ -77,7 +84,8 @@ class Neuron(NeuronInputProvider, Disposable):
         return self._last_result
 
     def dispose(self):
-        self._dispose_callback()
+        for callback in self._dispose_callbacks:
+            callback()
 
 
 class WeightedInputProvider:
@@ -106,4 +114,7 @@ class WeightedInputProvider:
         self._input_provider.set_on_dispose(on_dispose)
 
     def get_input(self):
-        self._input_provider.get_input()
+        return self._input_provider.get_input()
+
+    def get_id(self):
+        return self._input_provider.get_id()
